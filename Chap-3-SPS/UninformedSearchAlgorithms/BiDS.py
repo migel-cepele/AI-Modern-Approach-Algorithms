@@ -45,7 +45,7 @@ class BiDS:
         return (self.start_f in solution) and (self.start_b in solution) 
 
     # helper function to build the path
-    def buildPath(self, node):
+    def buildPath(self, node : Node):
         path = []
         while node is not None:
             path.append(node)
@@ -53,7 +53,7 @@ class BiDS:
         return list(reversed(path))    
     
     # joins the paths to the node from both directions
-    def joinNodes(self, dir, child, reached_s2):
+    def joinNodes(self, dir, child : Node, reached_s2 : Node):
         if dir == 'F':
             path1 = self.buildPath(child)
             path2 = self.buildPath(reached_s2)
@@ -68,7 +68,7 @@ class BiDS:
             return path1 + path2[1:]
         
     # solution path cost start from the initial node
-    def solutionPathCost(self, solution):
+    def solutionPathCost(self, solution : list[Node]):
         pathCost = 0
         for i in range(len(solution) - 1):
 
@@ -86,16 +86,20 @@ class BiDS:
         return solution[-1].pathCost if solution else float('inf')
               
 
-    def proceed(self, dir, frontier, reached, reached2, solution):
+    def proceed(self, dir, frontier: list[Node], reached : list[Node], reached2 : list[Node], solution : list[Node]):
 
         node = frontier.pop()
 
-        children = self.expand(node, dir)
+        children : list[Node] = self.expand(node, dir)
 
         for child in children:
             reached_s = next((n for n in reached if n.state == child.state), None)
 
             if reached_s == None or child.pathCost < reached_s.pathCost:
+
+                if reached_s != None:
+                    reached.remove(reached_s
+                                   )
                 reached.append(child)
                 frontier.append(child)
                 print("Adding state ", child.state ," to frontier and reached in direction ", dir)
@@ -114,7 +118,7 @@ class BiDS:
 
 
     # nodes will be expanded depending on the direction of the search
-    def expand(self, node, dir):
+    def expand(self, node: Node, dir):
         s = node.state
         print("Node to expand: ", s, " in dir ", dir)
 

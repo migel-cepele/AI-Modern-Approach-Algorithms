@@ -1,9 +1,9 @@
-from BFS import Node, BFS
+from BFS import BFS
 import numpy as np
 
 
-# Example route finding problem in albania
-states = np.array(["Sibiu", "Rimniu Vilcea", "Fagaras", "Pitesta", "Bucharest"])
+# Example route finding problem in romania
+states = np.array(["Sibiu", "Rimniu Vilcea", "Fagaras", "Pitesti", "Bucharest"])
 
 actions = np.array([[1, 2], [3, -1], [4, -1], [4, -1], [-1, -1]]) 
 
