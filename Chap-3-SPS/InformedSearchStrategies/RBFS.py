@@ -18,20 +18,42 @@ class RBFS:
         print("Recursive BFS Search")
 
         solution, fValue = self.rbfs(self.start, float('inf'))
-        return solution, fValue 
+        return solution, fValue, solution.path()
     
     def rbfs(self, node: Node, fLimit):
         print("Node ", node.state, " and flimit ", fLimit)
 
         if node.state == self.goal:
             print("Goal reached")
-            return node
+            return node, node.pathCost
         
         successors : list[Node] = self.expand(node)
         if len(successors) == 0:
             print('Node ', node.state, ' has no successors')
             return None, float('inf')
+        
         for s in successors:
+            s.f = max(s.f, node.f) # avoids redundant paths, those which again up in the tree
+        
+        while True:
+            # successor with the lowest f value
+            index = self.evaluationFunction(successors)
+            best = successors[index]
+            if best.f > fLimit:
+                return None, best.f
+            
+            # second lowest, if it exists
+            successors2 : list[Node] = successors.remove(best)
+            if successors2 != None:
+                index2 = self.evaluationFunction(successors2)
+                alternativeF = successors2[index2].f
+            else:
+                alternativeF = float('Inf')
+
+            result, best.f = self.rbfs(best, min(fLimit, alternativeF))
+
+            if result != None:
+                return result, best.f
             
 
 
@@ -148,10 +170,10 @@ hsld = np.array([
 ])
 
 # evaluation function returns the node with min heuristic function
-def evaluation(frontier):
-    return np.argmin([node.h + node.pathCost for node in frontier])
+def evaluation(frontier: list[Node]):
+    return np.argmin([node.f for node in frontier])
 
 
 rbfs = RBFS(0, 12, actions, action_cost, states, evaluation, hsld)
-print(f'Path and path cost: {rbfs.search()}')
+print(f'Solution, path cost and path: {rbfs.search()}')
 
