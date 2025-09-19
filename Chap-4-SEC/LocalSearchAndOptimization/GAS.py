@@ -3,6 +3,11 @@ import bisect
 import numpy as np
 from State import State
 
+# this algorithm simulates a genetic evolution of an initial population of states.
+# based on some parameters, we generate more states based on those initial states, 
+# until we find a state whose generated value exceeds the f_thres parameter
+# the value of the generated state is computed arbitrarily and some default parameters
+# like ngen, pmut and gene_pool
 
 class GA:
     def __init__(self, population):
@@ -17,24 +22,28 @@ class GA:
 
 
 
-    def genetic_algorithm(self, population : list[State], gene_pool=[0,1], f_thres = None, ngen = 10, pmut = 0.1):
+    def genetic_algorithm(self, population : list[State], gene_pool=['A','T'], f_thres = 500, ngen = 10, pmut = 0.1):
         for i in range(ngen):
-            population = [self.mutate(self.recombine(*self.select(2, population)), gene_pool, pmut)
-                          for i in range(len(population))]
+            for j in range(len(population)):
+                population.append(self.mutate(self.recombine(*self.select(2, population)), gene_pool, pmut))
             
             fittest_individual = self.fitness_threshhold(f_thres, population)
             if fittest_individual:
                 return fittest_individual
             
-        return np.argmax([state.value for state in population])
+        index = np.argmax([state.value for state in population])
+        return population[index].name, population[index].value
 
     
     def fitness_threshhold(self, f_thres, population : list[State]):
         if not f_thres:
             return None
-        fittest_individual : State = np.argmax([state.value for state in population])
-        if fittest_individual.value >= f_thres:
-            return fittest_individual
+        # return the index
+        fittest_individual = np.argmax([state.value for state in population])
+        print("Fittest individual value in population ", population[fittest_individual].value)
+
+        if population[fittest_individual].value >= f_thres:
+            return population[fittest_individual].name, population[fittest_individual].value
         
         return None
 
@@ -71,8 +80,10 @@ class GA:
         y = yy.name
         n = len(x)
         c = np.random.randint(0, n)
-        
-        return x[:c] + y[c:]
+        new_val = np.random.randint((xx.value + yy.value)/2, (xx.value + yy.value) * 2/3)
+        new_state = State(x[:c] + y[c:], new_val)
+        print("New val for state ", new_state.name, " is ", new_val)
+        return State(new_state.name, new_val)
 
 
     def recombine_uniform(self, x, y):
@@ -86,9 +97,10 @@ class GA:
 
         return ''.join(str(r) for r in result)
 
-    def mutate(self, x, gene_pool, pmut):
+    def mutate(self, xx : State, gene_pool, pmut):
+        x = xx.name
         if np.random.uniform(0,1) >= pmut:
-            return x
+            return xx
         
         n = len(x)
         g = len(gene_pool)
@@ -96,7 +108,9 @@ class GA:
         r = np.random.randint(0,g)
 
         new_gene = gene_pool[r]
-        return x[:c] + new_gene + x[c+1:]
+        new_state = State(x[:c] + new_gene + x[c+1:], xx.value)
+        print("Mutation of the state ", new_state.name, " with value ", new_state.value)
+        return new_state
         
         
 
@@ -114,4 +128,4 @@ init_population = [
     ]
 
 ga = GA(init_population)
-print(ga.genetic_search())
+print("State with the value higher than the threshhold in GAS is ", ga.genetic_search())
